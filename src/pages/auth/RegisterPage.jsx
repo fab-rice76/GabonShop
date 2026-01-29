@@ -1,162 +1,212 @@
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Link,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { PersonAddAlt as PersonAddIcon, EmojiEvents } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Container,
+    TextField,
+    Typography,
+    Link,
+    Alert,
+    InputAdornment,
+    Grid,
+    CircularProgress
+} from "@mui/material";
+import { Person, Email, Phone, Lock } from "@mui/icons-material";
 
 const RegisterPage = () => {
-  const { registerUser } = useAuth();
+    const { registerUser } = useAuth();
+    const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: ""
+    });
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    if (!name.trim()) return setError("Le nom complet est obligatoire");
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
-    try {
-      await registerUser({ email, password, name, phone });
-      alert("Compte créé avec succès !");
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    }
-  };
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setError("");
 
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "75vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Container maxWidth="md" sx={{ width: "100%", py: { xs: 4, md: 6 } }}>
-        <Paper
-          elevation={6}
-          sx={{
-            borderRadius: 3,
-            overflow: "hidden",
-            bgcolor: "background.paper",
-          }}
-        >
-              <Box
-                component="form"
-                onSubmit={handleRegister}
+        if (formData.password !== formData.confirmPassword) {
+            return setError("Les mots de passe ne correspondent pas");
+        }
+
+        if (formData.password.length < 6) {
+            return setError("Le mot de passe doit contenir au moins 6 caractères");
+        }
+
+        setLoading(true);
+
+        try {
+            await registerUser({
+                email: formData.email,
+                password: formData.password,
+                name: formData.name,
+                phone: formData.phone,
+                role: "user" // Default role
+            });
+            navigate("/my-products"); // Redirect to the user products page
+        } catch (err) {
+            console.error(err);
+            setError("Échec de l'inscription. L'email est peut-être déjà utilisé.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Container component="main" maxWidth="sm">
+            <Box
                 sx={{
-                  p: { xs: 3, md: 4 },
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2.5,
+                    marginTop: 4,
+                    marginBottom: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                 }}
-              >
-                <Box>
-                  <Typography variant="overline" color="primary">
-                    Inscription
-                  </Typography>
-                  <Typography variant="h5" fontWeight={700}>
-                    Démarrez votre aventure
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Quelques informations suffisent pour créer votre compte.
-                  </Typography>
+            >
+                <Box sx={{ mb: 4, textAlign: 'center' }}>
+                    <Typography component="h1" variant="h4" gutterBottom fontWeight="bold">
+                        Créer un compte
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        Rejoignez la plus grande communauté d'achat du Gabon
+                    </Typography>
                 </Box>
 
-                {error && (
-                  <Alert severity="error" variant="outlined">
-                    {error}
-                  </Alert>
-                )}
+                <Card sx={{ width: '100%', borderRadius: 2, boxShadow: 3 }}>
+                    <CardContent sx={{ p: 4 }}>
+                        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-                <Stack spacing={2}>
-                  <TextField
-                    type="text"
-                    label="Nom complet"
-                    placeholder="Nom et prénom"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    fullWidth
-                    required
-                  />
+                        <form onSubmit={handleRegister}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <TextField
+                                    name="name"
+                                    label="Nom complet"
+                                    placeholder="Jean Dupont"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Person color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
 
-                  <TextField
-                    type="text"
-                    label="Numéro de téléphone"
-                    placeholder="+241 ..."
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    fullWidth
-                  />
+                                <TextField
+                                    type="email"
+                                    name="email"
+                                    label="Adresse Email"
+                                    placeholder="exemple@email.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Email color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
 
-                  <TextField
-                    type="email"
-                    label="Adresse e-mail"
-                    placeholder="exemple@mail.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                    required
-                  />
+                                <TextField
+                                    type="tel"
+                                    name="phone"
+                                    label="Numéro de téléphone"
+                                    placeholder="+241 07 00 00 00"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Phone color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
 
-                  <TextField
-                    type="password"
-                    label="Mot de passe"
-                    placeholder="Au moins 6 caractères"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                    required
-                  />
-                </Stack>
+                                <TextField
+                                    type="password"
+                                    name="password"
+                                    label="Mot de passe"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Lock color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
 
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  startIcon={<PersonAddIcon />}
-                  sx={{ borderRadius: 2, py: 1.3 }}
-                  fullWidth
-                >
-                  Créer mon compte
-                </Button>
+                                <TextField
+                                    type="password"
+                                    name="confirmPassword"
+                                    label="Confirmer"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    required
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Lock color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
 
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={1}
-                  justifyContent="space-between"
-                  alignItems={{ xs: "flex-start", sm: "center" }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Vous avez déjà un compte ?
-                  </Typography>
-                  <Link component={RouterLink} to="/login" underline="hover">
-                    Se connecter
-                  </Link>
-                </Stack>
-              </Box>
-        </Paper>
-      </Container>
-    </Box>
-  );
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    size="large"
+                                    fullWidth
+                                    disabled={loading}
+                                    sx={{ mt: 1, py: 1.5, fontSize: '1.1rem' }}
+                                >
+                                    {loading ? <CircularProgress size={24} color="inherit" /> : "S'inscrire"}
+                                </Button>
+                            </Box>
+                        </form>
+                        <Box sx={{ mt: 3, textAlign: 'center' }}>
+                            <Typography variant="body2" color="text.secondary">
+                                Vous avez déjà un compte ?{' '}
+                                <Link component={RouterLink} to="/login" variant="body2">
+                                    Se connecter
+                                </Link>
+                            </Typography>
+                        </Box>
+                    </CardContent>
+                </Card>
+            </Box>
+        </Container>
+    );
 };
 
 export default RegisterPage;

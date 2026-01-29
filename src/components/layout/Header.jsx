@@ -26,16 +26,13 @@ import {
   ExitToApp as LogoutIcon,
   Search as SearchIcon,
   Category as CategoryIcon,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
-
-  // 👉 Ce que le AuthContext expose réellement
   const { currentUser, logoutUser } = useAuth();
-
-  // 👉 Vérification d'authentification
   const isLoggedIn = currentUser !== null;
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -51,13 +48,8 @@ const Header = () => {
     }
   };
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
     logoutUser();
@@ -66,19 +58,22 @@ const Header = () => {
   };
 
   const navigationLinks = [
-    { label: 'Accueil', path: '/', icon: <HomeIcon fontSize="small" /> },
-    { label: 'Produits', path: '/products', icon: <CategoryIcon fontSize="small" /> },
-    ...(isLoggedIn
-      ? [
-          { label: 'Mes produits', path: '/my-products', icon: <ItemsIcon fontSize="small" /> },
-        ]
-      : []),
+    { label: 'Rechercher', path: '/products', icon: <SearchIcon fontSize="small" /> },
   ];
 
   return (
     <>
-    
-      <AppBar position="sticky" elevation={2} sx={{ width: '100%' }}>
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          bgcolor: 'white',
+          color: 'text.primary',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          width: '100%'
+        }}
+      >
         <Toolbar
           sx={{
             maxWidth: '1200px',
@@ -86,96 +81,100 @@ const Header = () => {
             margin: '0 auto',
             display: 'flex',
             justifyContent: 'space-between',
-            gap: 2,
+            gap: { xs: 1, md: 3 },
+            px: { xs: 2, md: 3 }
           }}
         >
+          {/* Logo */}
           <Typography
-            variant="h6"
+            variant="h5"
             component={Link}
             to="/"
             sx={{
               textDecoration: 'none',
-              color: 'inherit',
-              fontWeight: 'bold',
-              flexGrow: { xs: 1, sm: 0 },
-              ml: 3,
+              color: 'primary.main',
+              fontWeight: 900,
+              letterSpacing: '-0.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5
             }}
           >
-            GabonShop
+            Gabon<Box component="span" sx={{ color: '#FCD116' }}>Shop</Box>
           </Typography>
 
-          {/* Barre de recherche desktop */}
+          {/* Bouton Desktop: Déposer une annonce */}
+          <Button
+            component={Link}
+            to="/products/new"
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              borderRadius: 2,
+              px: 2,
+              fontWeight: 'bold',
+              textTransform: 'none',
+              boxShadow: 'none',
+              '&:hover': { boxShadow: '0 4px 12px rgba(0, 158, 96, 0.2)' }
+            }}
+          >
+            Déposer une annonce
+          </Button>
+
+          {/* Barre de recherche desktop (plus discrète) */}
           <Box
             component="form"
             onSubmit={handleSearch}
             sx={{
               display: { xs: 'none', md: 'flex' },
               flexGrow: 1,
-              maxWidth: 500,
-              mx: 2,
+              maxWidth: 400,
             }}
           >
             <TextField
               fullWidth
               size="small"
-              placeholder="Rechercher des produits..."
+              placeholder="Que recherchez-vous ?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <SearchIcon color="action" />
                   </InputAdornment>
                 ),
               }}
               sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.15)',
-                borderRadius: 1,
+                bgcolor: '#f4f6f7',
+                borderRadius: 2,
                 '& .MuiOutlinedInput-root': {
-                  color: 'white',
-                  '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.7)',
-                  },
-                },
-                '& .MuiInputBase-input::placeholder': {
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  opacity: 1,
+                  '& fieldset': { borderColor: 'transparent' },
+                  '&:hover fieldset': { borderColor: 'transparent' },
+                  '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                 },
               }}
             />
           </Box>
 
-          {/* Menu Desktop */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-            {navigationLinks.map((item) => (
-              <Button
-                key={item.path}
-                component={Link}
-                to={item.path}
-                color="inherit"
-                startIcon={item.icon}
-              >
-                {item.label}
-              </Button>
-            ))}
-
+          {/* Accès compte / Menu Desktop */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isLoggedIn ? (
               <>
-                <Button
-                  color="inherit"
-                  onClick={handleMenuOpen}
-                  startIcon={
-                    <Avatar sx={{ width: 24, height: 24 }}>
-                       {(currentUser?.name?.[0] || currentUser?.email?.[0] || '?').toUpperCase()}
-                    </Avatar>
-                  }
-                ></Button>
+                <IconButton onClick={handleMenuOpen} sx={{ p: 0.5 }}>
+                  <Avatar
+                    sx={{
+                      width: 35,
+                      height: 35,
+                      bgcolor: 'primary.main',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {(currentUser?.name?.[0] || currentUser?.email?.[0] || '?').toUpperCase()}
+                  </Avatar>
+                </IconButton>
 
                 <Menu
                   anchorEl={anchorEl}
@@ -183,110 +182,116 @@ const Header = () => {
                   onClose={handleMenuClose}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  PaperProps={{
+                    sx: { mt: 1.5, minWidth: 200, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }
+                  }}
                 >
+                  <Box sx={{ px: 2, py: 1.5 }}>
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {currentUser?.name || 'Utilisateur'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {currentUser?.email}
+                    </Typography>
+                  </Box>
+                  <Divider />
                   <MenuItem component={Link} to="/my-products" onClick={handleMenuClose}>
-                    Mes produits
+                    <ItemsIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+                    Mes annonces
                   </MenuItem>
+                  {currentUser?.role === 'admin' && (
+                    <MenuItem component={Link} to="/admin" onClick={handleMenuClose}>
+                      <DashboardIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+                      Administration
+                    </MenuItem>
+                  )}
                   <Divider />
                   <MenuItem onClick={handleLogout}>
-                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
-                    Déconnexion
+                    <LogoutIcon fontSize="small" sx={{ mr: 1.5, color: 'error.main' }} />
+                    <Typography color="error">Se déconnecter</Typography>
                   </MenuItem>
                 </Menu>
               </>
             ) : (
-              <>
-                <Button component={Link} to="/login" color="inherit">
-                  Connexion
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+                <Button
+                  component={Link}
+                  to="/login"
+                  color="inherit"
+                  sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                >
+                  Se connecter
                 </Button>
-                <Button component={Link} to="/register" variant="outlined" color="inherit">
-                  Inscription
+                <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 20, my: 'auto' }} />
+                <Button
+                  component={Link}
+                  to="/register"
+                  sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                >
+                  S'inscrire
                 </Button>
-              </>
+              </Box>
             )}
-          </Box>
 
-          {/* Menu Mobile */}
-          <IconButton
-            color="inherit"
-            onClick={() => setMobileMenuOpen(true)}
-            sx={{ display: { md: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
+            {/* Menu Mobile */}
+            <IconButton
+              color="inherit"
+              onClick={() => setMobileMenuOpen(true)}
+              sx={{ display: { md: 'none' } }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
 
       {/* Drawer Mobile */}
       <Drawer anchor="right" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
-        <Box sx={{ width: 260, pt: 2 }}>
-          <List>
+        <Box sx={{ width: 280, p: 3 }}>
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>Menu</Typography>
 
-            {/* Barre de recherche mobile */}
-            <ListItem>
-              <Box component="form" onSubmit={handleSearch} sx={{ width: '100%' }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
+          <List sx={{ gap: 1, display: 'flex', flexDirection: 'column' }}>
+            <ListItem
+              button
+              component={Link}
+              to="/products/new"
+              onClick={() => setMobileMenuOpen(false)}
+              sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: 2, mb: 1 }}
+            >
+              <AddIcon sx={{ mr: 2 }} />
+              <ListItemText primary="Déposer une annonce" primaryTypographyProps={{ fontWeight: 'bold' }} />
             </ListItem>
 
-            <Divider />
+            <ListItem button component={Link} to="/" onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 2 }}>
+              <HomeIcon sx={{ mr: 2, color: 'text.secondary' }} />
+              <ListItemText primary="Accueil" />
+            </ListItem>
 
-            {navigationLinks.map((item) => (
-              <ListItem
-                button
-                key={item.path}
-                component={Link}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.icon}
-                <ListItemText sx={{ ml: 2 }} primary={item.label} />
-              </ListItem>
-            ))}
+            <ListItem button component={Link} to="/products" onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 2 }}>
+              <SearchIcon sx={{ mr: 2, color: 'text.secondary' }} />
+              <ListItemText primary="Rechercher" />
+            </ListItem>
 
-            {isLoggedIn ? (
+            <Divider sx={{ my: 1 }} />
+
+            {!isLoggedIn ? (
               <>
-                <ListItem
-                  button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                >
-                  <LogoutIcon fontSize="small" />
-                  <ListItemText sx={{ ml: 2 }} primary="Déconnexion" />
+                <ListItem button component={Link} to="/login" onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 2 }}>
+                  <ListItemText primary="Se connecter" />
+                </ListItem>
+                <ListItem button component={Link} to="/register" onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 2 }}>
+                  <ListItemText primary="Créer un compte" />
                 </ListItem>
               </>
             ) : (
               <>
-                <ListItem
-                  button
-                  component={Link}
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ListItemText primary="Connexion" />
+                <ListItem button component={Link} to="/my-products" onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 2 }}>
+                  <ItemsIcon sx={{ mr: 2, color: 'text.secondary' }} />
+                  <ListItemText primary="Mes annonces" />
                 </ListItem>
-                <ListItem
-                  button
-                  component={Link}
-                  to="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ListItemText primary="Inscription" />
+                <ListItem button onClick={handleLogout} sx={{ borderRadius: 2 }}>
+                  <LogoutIcon sx={{ mr: 2, color: 'error.main' }} />
+                  <ListItemText primary="Déconnexion" primaryTypographyProps={{ color: 'error' }} />
                 </ListItem>
               </>
             )}

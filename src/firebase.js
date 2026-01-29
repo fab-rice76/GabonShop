@@ -4,16 +4,14 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// ---- CONFIGURATION CORRIGÉE ----
-// Important : le storageBucket doit rester en .appspot.com
-// même si Firebase affiche .firebasestorage.app dans l’interface !
+// Configuration Firebase avec variables d'environnement
 const firebaseConfig = {
-  apiKey: "AIzaSyBagOyM5SjXpPTBXQMtxRVO1QGjRch7HIw",
-  authDomain: "gabonshop-af5a6.firebaseapp.com",
-  projectId: "gabonshop-af5a6",
-  storageBucket: "gabonshop-af5a6.appspot.com", // ← ESSENTIEL (sinon erreur 400 CONFIGURATION_NOT_FOUND)
-  messagingSenderId: "747613975016",
-  appId: "1:747613975016:web:eda3826526c475b3fc345d",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialisation

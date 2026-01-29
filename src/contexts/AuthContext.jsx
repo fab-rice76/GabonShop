@@ -9,19 +9,22 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // --- Création de compte + Firestore ---
-  const registerUser = async ({ email, password, name, phone }) => {
+  const registerUser = async ({ email, password, name, phone, role }) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     // Enregistrer dans Firestore
     await setDoc(doc(db, "users", cred.user.uid), {
-      name,
-      phone,
+      name: name?.trim() || "",
+      phone: phone?.trim() || "",
+      role: role?.trim() || "user",
       email,
       createdAt: new Date(),
     });
@@ -40,19 +43,30 @@ export const AuthProvider = ({ children }) => {
   // --- Surveille l’état Auth ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        setCurrentUser(null);
-        return;
-      }
+      try {
+        if (!firebaseUser) {
+          setCurrentUser(null);
+          setLoading(false);
+          return;
+        }
 
-      // Charger info Firestore
-              const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+        // Charger info Firestore
+        const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+        const data = snap.data() || {};
         setCurrentUser({
-          id: firebaseUser.uid,   // <- NECESSAIRE
+          id: firebaseUser.uid,
           uid: firebaseUser.uid,
-          ...snap.data(),
+          name: data.name || firebaseUser.displayName || firebaseUser.email,
+          phone: data.phone || data.whatsapp || "",
+          email: data.email || firebaseUser.email,
+          role: data.role || "user",
+          ...data,
         });
-
+      } catch (error) {
+        console.error("Auth state change error:", error);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return unsubscribe;
@@ -62,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         currentUser,
+        loading,
         registerUser,
         loginUser,
         logoutUser,

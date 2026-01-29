@@ -1,0 +1,15 @@
+﻿
+> gabonshop@0.0.0 lint
+> eslint .
+
+
+C:\Users\DELL\OneDrive\Documents\Projet\gabonshop\src\components\layout\DashboardLayout.jsx
+  16:5   error  'useMediaQuery' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+  38:11  error  'theme' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\DELL\OneDrive\Documents\Projet\gabonshop\src\pages\products\ProductDetailPage.jsx
+  23:11  error  'currentUser' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+  24:21  error  'deleteProduct' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Ô£û 4 problems (4 errors, 0 warnings)
+

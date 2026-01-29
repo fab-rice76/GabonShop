@@ -12,6 +12,7 @@ import {
 import { db } from "../firebase";
 
 const ProductsContext = createContext();
+// eslint-disable-next-line react-refresh/only-export-components
 export const useProducts = () => useContext(ProductsContext);
 
 export const ProductsProvider = ({ children }) => {
@@ -38,7 +39,7 @@ export const ProductsProvider = ({ children }) => {
       ...data,
       ownerId: owner.id,
       ownerName: owner.name || owner.email,
-      ownerPhone: owner.phone,
+      ownerPhone: owner.phone || owner.whatsapp || owner.phoneNumber || "",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

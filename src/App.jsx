@@ -1,9 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProductsProvider } from './contexts/ProductsContext';
+import { AdminProvider } from './contexts/AdminContext';
+import theme from './theme/theme';
 
 // Layout Components
 import Header from './components/layout/Header';
@@ -17,104 +20,66 @@ import ProductFormPage from './pages/products/ProductFormPage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
 import MyProductsPage from './pages/profile/MyProductsPage';
+import AdminDashboard from './pages/admin/AdminDashboardPage'; // Assuming accurate file name from previous list_dir
 
-// Theme personnalisé pour le Gabon
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2E7D32', // Vert pour représenter la nature du Gabon
-      light: '#4CAF50',
-      dark: '#1B5E20',
-    },
-    secondary: {
-      main: '#FF6F00', // Orange pour l'énergie et la chaleur
-      light: '#FF8F00',
-      dark: '#E65100',
-    },
-    background: {
-      default: '#FAFAFA',
-      paper: '#FFFFFF',
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontSize: '2.5rem',
-      fontWeight: 600,
-    },
-    h2: {
-      fontSize: '2rem',
-      fontWeight: 500,
-    },
-    h3: {
-      fontSize: '1.75rem',
-      fontWeight: 500,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          textTransform: 'none',
-          fontWeight: 500,
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        },
-      },
-    },
-  },
-});
+// Legal / Help Pages
+import HowItWorksPage from './pages/legal/HowItWorksPage';
+import FaqPage from './pages/legal/FaqPage';
+import TermsPage from './pages/legal/TermsPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <AuthProvider>
         <ProductsProvider>
-          <Router>
-            <div className="App" style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              minHeight: '100vh',
-              alignItems: 'center'
-            }}>
-              <Header />
-              <main style={{ 
-                minHeight: 'calc(100vh - 140px)', 
-                paddingTop: '20px',
-                width: '100%',
-                maxWidth: '1200px',
-                margin: '0 auto',
+          <AdminProvider>
+            <Router>
+              <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'
+                minHeight: '100vh',
+                bgcolor: 'background.default'
               }}>
-                <Routes>
-                  {/* Pages publiques */}
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/products" element={<ProductListPage />} />
-                  <Route path="/products/new" element={<ProductFormPage />} />
-                  <Route path="/products/:productId/edit" element={<ProductFormPage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  
-                  {/* Pages d'authentification */}
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  
-                  {/* Gestion personnelle */}
-                  <Route path="/my-products" element={<MyProductsPage />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </Router>
+                <Header />
+                <Box component="main" sx={{
+                  flexGrow: 1,
+                  py: 4,
+                  px: 2,
+                  width: '100%',
+                  maxWidth: '1280px',
+                  mx: 'auto'
+                }}>
+                  <Routes>
+                    {/* Pages publiques */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products" element={<ProductListPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+
+                    {/* Pages d'aide et légales */}
+                    <Route path="/help/comment-ca-marche" element={<HowItWorksPage />} />
+                    <Route path="/help/faq" element={<FaqPage />} />
+                    <Route path="/legal/conditions" element={<TermsPage />} />
+                    <Route path="/legal/confidentialite" element={<PrivacyPage />} />
+
+                    {/* Pages d'authentification */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+
+                    {/* Protected Routes (To be wrapped in PrivateRoute later) */}
+                    <Route path="/products/new" element={<ProductFormPage />} />
+                    <Route path="/products/:productId/edit" element={<ProductFormPage />} />
+                    <Route path="/my-products" element={<MyProductsPage />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                  </Routes>
+                </Box>
+                <Footer />
+              </Box>
+            </Router>
+          </AdminProvider>
         </ProductsProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -1,24 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-    <script>
-      UPLOADCARE_PUBLIC_KEY = "64b02577201bb618ede6"; /* remplace par ta clé publique Uploadcare */
-    </script>
-    <!-- Uploadcare V3 widget -->
-<script
-type="module"
-src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"
-></script>
-
     
+    <!-- SEO Meta Tags -->
+    <title>GabonShop - Marketplace #1 au Gabon | Achetez et Vendez en Ligne</title>
+    <meta name="description" content="GabonShop est la plateforme de petites annonces leader au Gabon. Achetez et vendez facilement : véhicules, immobilier, électronique, mode et plus encore." />
+    <meta name="keywords" content="gabon, marketplace, petites annonces, vente, achat, véhicules, immobilier, libreville" />
+    <meta name="author" content="GabonShop" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="GabonShop - Marketplace #1 au Gabon" />
+    <meta property="og:description" content="Achetez et vendez facilement au Gabon. Véhicules, immobilier, électronique et plus encore." />
+    <meta property="og:image" content="/og-image.jpg" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GabonShop - Marketplace #1 au Gabon" />
+    <meta name="twitter:description" content="Achetez et vendez facilement au Gabon" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#1976d2" />
+    
+    <!-- Uploadcare Configuration -->
+    <script>
+      UPLOADCARE_PUBLIC_KEY = "64b02577201bb618ede6";
+    </script>
+    
+    <!-- Uploadcare V3 widget -->
+    <script
+      type="module"
+      src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"
+    ></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    
   </body>
 </html>

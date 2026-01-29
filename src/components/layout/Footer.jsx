@@ -83,16 +83,36 @@ const Footer = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <MuiLink href="#" color="inherit" underline="hover">
+              <MuiLink
+                component={Link}
+                to="/help/comment-ca-marche"
+                color="inherit"
+                underline="hover"
+              >
                 Comment ça marche ?
               </MuiLink>
-              <MuiLink href="#" color="inherit" underline="hover">
+              <MuiLink
+                component={Link}
+                to="/help/faq"
+                color="inherit"
+                underline="hover"
+              >
                 Foire aux questions (FAQ)
               </MuiLink>
-              <MuiLink href="#" color="inherit" underline="hover">
+              <MuiLink
+                component={Link}
+                to="/legal/conditions"
+                color="inherit"
+                underline="hover"
+              >
                 Conditions d'utilisation
               </MuiLink>
-              <MuiLink href="#" color="inherit" underline="hover">
+              <MuiLink
+                component={Link}
+                to="/legal/confidentialite"
+                color="inherit"
+                underline="hover"
+              >
                 Politique de confidentialité
               </MuiLink>
             </Box>
@@ -118,18 +138,6 @@ const Footer = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocationIcon fontSize="small" />
                 <Typography variant="body2">Libreville, Gabon</Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                <IconButton color="inherit" size="small">
-                  <FacebookIcon />
-                </IconButton>
-                <IconButton color="inherit" size="small">
-                  <WhatsAppIcon />
-                </IconButton>
-                <IconButton color="inherit" size="small">
-                  <InstagramIcon />
-                </IconButton>
               </Box>
             </Box>
           </Grid>

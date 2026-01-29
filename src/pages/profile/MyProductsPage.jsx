@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -8,58 +8,46 @@ import {
   CardActions,
   CardContent,
   CardMedia,
-  Container,
   Grid,
   Typography,
+  Container,
+  Paper,
+  CircularProgress
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, SentimentDissatisfied } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../contexts/ProductsContext';
 
 const MyProductsPage = () => {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const { products, deleteProduct } = useProducts();
 
-  // 🟦 Fonction universelle pour récupérer l'image
+  // 🔥 Fonction universelle pour récupérer l'image
   const getProductImage = (product) => {
     if (!product) return null;
 
-    // Cas 1 : images = ["url"]
     if (Array.isArray(product.images) && typeof product.images[0] === "string") {
       return product.images[0];
     }
-
-    // Cas 2 : images = [{ url: "..." }]
     if (Array.isArray(product.images) && product.images[0]?.url) {
       return product.images[0].url;
     }
-
-    // Cas 3 : images = "url"
     if (typeof product.images === "string") {
       return product.images;
     }
-
-    // Cas 4 : imageUrl unique
     if (product.imageUrl) {
       return product.imageUrl;
     }
-
     return null;
   };
 
-  // 🟩 Correction Uploadcare → vraie image
   const getSafeImageUrl = (url) => {
     if (!url) return null;
-
-    // Si déjà /nth/
     if (url.includes("/nth/")) return url;
-
-    // Si c'est un groupe (~)
     if (url.includes("~")) {
       return url.replace(/\/$/, "") + "/nth/0/";
     }
-
     return url;
   };
 
@@ -68,133 +56,150 @@ const MyProductsPage = () => {
     [products, currentUser],
   );
 
+  const handleDelete = (productId) => {
+    const confirmDelete = window.confirm('Supprimer ce produit ?');
+    if (!confirmDelete) return;
+    deleteProduct(productId);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   if (!currentUser) {
     return (
-      <Container maxWidth="md">
-        <Alert
-          severity="info"
-          action={
-            <Button component={Link} to="/login" color="inherit" size="small">
-              Me connecter
-            </Button>
-          }
-        >
-          Connectez-vous pour gérer vos produits.
-        </Alert>
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Alert severity="warning">Vous devez être connecté pour voir vos produits.</Alert>
       </Container>
     );
   }
 
-  const handleDelete = (productId) => {
-    const confirmDelete = window.confirm('Supprimer ce produit ?');
-    if (!confirmDelete) return;
-    deleteProduct(productId, currentUser.id);
-  };
-
   return (
     <Container maxWidth="lg">
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 4,
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Mes produits
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Ajoutez, mettez à jour ou supprimez vos publications.
-          </Typography>
-        </Box>
-
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Mes Produits
+        </Typography>
         <Button
-          component={Link}
-          to="/products/new"
           variant="contained"
           startIcon={<AddIcon />}
+          onClick={() => navigate('/products/new')}
+          sx={{ borderRadius: 2 }}
         >
           Nouveau produit
         </Button>
       </Box>
 
       {myProducts.length === 0 ? (
-        <Alert severity="info">
-          Vous n&apos;avez pas encore publié de produit. Cliquez sur « Nouveau produit » pour vous lancer.
-        </Alert>
+        <Paper sx={{
+          textAlign: 'center',
+          py: 8,
+          px: 2,
+          borderRadius: 4,
+          bgcolor: 'background.paper',
+          border: '1px dashed',
+          borderColor: 'divider'
+        }}>
+          <SentimentDissatisfied sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Aucun produit pour le moment
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Commencez à vendre en ajoutant votre premier article.
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/products/new')}
+          >
+            Créer un produit
+          </Button>
+        </Paper>
       ) : (
         <Grid container spacing={3}>
           {myProducts.map((product) => {
             const imageUrl = getSafeImageUrl(getProductImage(product));
 
             return (
-              <Grid item xs={12} sm={6} md={4} key={product.id}>
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {imageUrl ? (
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={imageUrl}
-                      alt={product.title}
-                      sx={{ objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <Box
-                      sx={{
-                        height: 200,
-                        bgcolor: 'grey.200',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        Pas d'image
-                      </Typography>
-                    </Box>
-                  )}
+              <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                <Card sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 4
+                  }
+                }}>
+                  <Box sx={{ position: 'relative', pt: '75%' /* 4:3 Aspect Ratio */ }}>
+                    {imageUrl ? (
+                      <CardMedia
+                        component="img"
+                        image={imageUrl}
+                        alt={product.title}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: 'grey.100',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary">
+                          Pas d'image
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
 
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" gutterBottom>
+                  <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                    <Typography variant="subtitle1" fontWeight="bold" noWrap title={product.title}>
                       {product.title}
                     </Typography>
 
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      Dernière mise à jour le{' '}
-                      {new Date(product.updatedAt).toLocaleDateString('fr-FR')}
+                    <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                      {product.price ? new Intl.NumberFormat('fr-FR', {
+                        style: 'currency',
+                        currency: 'XAF',
+                        minimumFractionDigits: 0,
+                      }).format(product.price) : 'Gratuit'}
                     </Typography>
 
-                    <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                      {product.description}
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                      Publié le {new Date(product.createdAt || Date.now()).toLocaleDateString('fr-FR')}
                     </Typography>
-
-                    {product.price && (
-                      <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
-                        {new Intl.NumberFormat('fr-FR', {
-                          style: 'currency',
-                          currency: 'XAF',
-                          minimumFractionDigits: 0,
-                        }).format(product.price)}
-                      </Typography>
-                    )}
                   </CardContent>
 
-                  <CardActions sx={{ justifyContent: 'space-between' }}>
+                  <CardActions sx={{ px: 2, pb: 2, pt: 0, justifyContent: 'space-between' }}>
                     <Button
-                      variant="outlined"
+                      size="small"
                       startIcon={<EditIcon />}
                       onClick={() => navigate(`/products/${product.id}/edit`)}
                     >
                       Modifier
                     </Button>
                     <Button
-                      variant="text"
+                      size="small"
                       color="error"
-                      startIcon={<DeleteIcon />}
                       onClick={() => handleDelete(product.id)}
                     >
                       Supprimer

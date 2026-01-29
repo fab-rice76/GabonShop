@@ -1,139 +1,133 @@
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
-  Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   Container,
-  Divider,
-  Grid,
-  Link,
-  Paper,
-  Stack,
   TextField,
   Typography,
+  Link,
+  Alert,
+  InputAdornment,
+  IconButton,
+  CircularProgress
 } from "@mui/material";
-import { Login as LoginIcon, ShieldOutlined } from "@mui/icons-material";
-import { useAuth } from "../../contexts/AuthContext.jsx";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 
 const LoginPage = () => {
   const { loginUser } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       await loginUser(email, password);
-      alert("Connexion réussie !");
+      navigate("/my-products"); // Redirect to a protected page after login
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError("Échec de la connexion. Vérifiez vos identifiants.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "75vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Container maxWidth="md" sx={{ width: "100%", py: { xs: 4, md: 6 } }}>
-        <Paper
-          elevation={6}
-          sx={{
-            borderRadius: 3,
-            overflow: "hidden",
-            bgcolor: "background.paper",
-          }}
-        >
-        
-              <Box
-                component="form"
-                onSubmit={handleLogin}
-                sx={{
-                  p: { xs: 3, md: 4 },
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2.5,
+    <Container maxWidth="sm">
+      <Box sx={{ mt: 8, mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Bon retour
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Connectez-vous pour gérer votre boutique
+        </Typography>
+      </Box>
+
+      <Card>
+        <CardContent sx={{ p: 4 }}>
+          {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+
+          <form onSubmit={handleLogin}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <TextField
+                type="email"
+                label="Adresse Email"
+                placeholder="exemple@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email color="action" />
+                    </InputAdornment>
+                  ),
                 }}
+              />
+
+              <TextField
+                type={showPassword ? "text" : "password"}
+                label="Mot de passe"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={loading}
+                sx={{ mt: 1, py: 1.5 }}
               >
-                <Box>
-                  <Typography variant="overline" color="primary">
-                    Connexion
-                  </Typography>
-                  <Typography variant="h5" fontWeight={700}>
-                    Ravi de vous revoir
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Accédez à votre compte en quelques secondes.
-                  </Typography>
-                </Box>
+                {loading ? <CircularProgress size={24} color="inherit" /> : "Se connecter"}
+              </Button>
+            </Box>
+          </form>
 
-                {error && (
-                  <Alert severity="error" variant="outlined">
-                    {error}
-                  </Alert>
-                )}
-
-                <Stack spacing={2}>
-                  <TextField
-                    type="email"
-                    label="Adresse e-mail"
-                    placeholder="exemple@mail.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                    required
-                  />
-
-                  <TextField
-                    type="password"
-                    label="Mot de passe"
-                    placeholder="Votre mot de passe"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                    required
-                  />
-                </Stack>
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  startIcon={<LoginIcon />}
-                  sx={{ borderRadius: 2, py: 1.3 }}
-                  fullWidth
-                >
-                  Se connecter
-                </Button>
-
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={1}
-                  justifyContent="space-between"
-                  alignItems={{ xs: "flex-start", sm: "center" }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Nouveau sur GabonShop ?
-                  </Typography>
-                  <Link component={RouterLink} to="/register" underline="hover">
-                    Créer un compte
-                  </Link>
-                </Stack>
-              </Box>
-        </Paper>
-      </Container>
-    </Box>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Pas encore de compte ?{' '}
+              <Link component={RouterLink} to="/register" fontWeight="600" underline="hover">
+                Créer un compte
+              </Link>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 
